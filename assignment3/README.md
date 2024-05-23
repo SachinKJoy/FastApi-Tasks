@@ -5,7 +5,7 @@ This is a simple FastAPI application for managing Address Book. It provides endp
 
 1. Clone the repository:
 
- - git clone https://github.com/SachinKJoy/FastAPI-addressbook.git
+ - git clone https://github.com/SachinKJoy/FastApi-Tasks
 
 
 2. Open a Powershell terminal and create a virtual environment to run your application and download dependencies 

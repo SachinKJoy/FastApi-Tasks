@@ -1,0 +1,25 @@
+Question 1: Explain how FastAPI handles asynchronous requests and its benefits over synchronous code in Python.
+
+- An asynchronous requests can handle multiple requests concurrently without blocking. Below is an example of an asynchronous REST API using FastAPI.
+
+    from fastapi import FastAPI
+    import asyncio
+    app = FastAPI()
+    @app.get("/async")
+    async def async_endpoint():
+        # Simulate a time-consuming task asynchronously
+        result = await some_expensive_computation_async()
+        return {"message": "Async API response", "result": result}
+    async def some_expensive_computation_async():
+        # Simulate an asynchronous time-consuming operation
+        await asyncio.sleep(3)
+        return "Result of the asynchronous computation"
+
+- In this example, the /async endpoint uses the async keyword and await to execute the time-consuming task asynchronously. While one request is awaiting await asyncio.sleep(3), the API can still handle other incoming requests concurrently.
+
+
+Its benefits over Synchronous:
+
+1) Async can Handle multiple requests concurrently but Sync Handles requests sequentially, one at a time.
+2) Async allows the API to execute other tasks while waiting for asynchronous operations to complete, but Sync Blocks until a request is fully processed, which may lead to slower response times.
+3) Async can provide better scalability and responsiveness, Sync may have scalability issues under heavy load.

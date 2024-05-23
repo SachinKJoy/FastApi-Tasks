@@ -1,0 +1,42 @@
+Question 2: Describe how dependency injection works in FastAPI and give an example of its practical use.
+
+
+- Dependency injection in FastAPI is a design pattern that allows for the decoupling of components, making your code more modular and testable. It's a way to provide your application with the necessary dependencies (like database sessions, configurations, or custom services) in a flexible and manageable way.
+
+Basic Example: Injecting a Database Session
+
+    from fastapi import FastAPI, Depends
+    from sqlalchemy.orm import Session
+    from .database import SessionLocal
+
+    app = FastAPI()
+
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    @app.get("/items/")
+    def read_items(db: Session = Depends(get_db)):
+        items = db.query(Item).all()
+        return items
+
+- In this example, get_db is a dependency that provides a SQLAlchemy session to the endpoint. The Depends function is used to inject this dependency.
+
+
+Another Example:
+
+    from fastapi import FastAPI, Depends
+    app = FastAPI()
+    def get_query(token: str):
+        return {"token": token}
+
+    # Endpoint that depends on the `get_query` function
+    @app.get("/items/")
+    async def read_items(token: str = Depends(get_query)):
+        return {"token": token}
+
+
+- In the code above, Depends is a special class provided by FastAPI. When you include a parameter in your path operation function with a default value set to an instance of Depends that calls another function, FastAPI will understand that it needs to call that dependency function and use the result as the argument for your path operation function.

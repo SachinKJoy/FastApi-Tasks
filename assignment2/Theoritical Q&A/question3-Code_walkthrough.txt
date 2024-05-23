@@ -1,0 +1,133 @@
+Question 3: Code walkthrough
+
+- The code sets up a FastAPI application with routes for adding books and reviews, and for retrieving books and reviews based on various criteria. 
+It interacts with SQLlite database using SQLAlchemy for data storage and retrieval.
+
+
+Main.py Explanation:
+
+1) Imports
+
+- The code imports necessary modules and classes. FastAPI, Depends, HTTPException, Session, Optional, crud, models, schemas, SessionLocal, and engine are imported from respective modules.
+
+
+
+2) Database Initialization:
+
+    "models.Base.metadata.create_all(bind=engine): "
+- This line creates the database tables defined in the SQLAlchemy models using the engine object.
+
+
+
+
+3) FastAPI Initialization:
+
+    "app = FastAPI(): "
+
+- This initializes a FastAPI application instance.
+
+
+
+
+4) Dependency for Database Session:
+    """
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    """
+    This is a dependency function that yields a database session and closes it after its usage.
+
+
+
+5) Routes
+
+    a) Adding a New Book:
+    """
+    @app.post("/books/{book_id}")
+    def add_book(book_id: int, book: schemas.BookBase, db: Session = Depends(get_db)):
+
+        db_book = crud.get_book_by_id(db, book_id=book_id)
+        if db_book:
+            raise HTTPException(status_code=400, detail="Book Already Exists with the given Id")
+        return crud.create_book(db=db, book=book, book_id=book_id)
+
+    """
+
+    This route is used for adding a new book with a given book ID.
+    add_book() function takes book_id and book (of type schemas.BookBase) as parameters and a database session db as a dependency.
+    It checks if the book with the given ID already exists. If it does, it raises an HTTPException.
+    Otherwise, it creates a new book using the crud.create_book() function.
+
+
+
+    b) Adding a Review to a Book:
+
+    """ 
+    @app.post("/books/{book_id}/add_review")
+    def add_review(book_id: int, review: schemas.Review, db: Session = Depends(get_db)):
+        
+        db_book = crud.get_book_by_id(db, book_id=book_id)
+        if db_book:
+            return crud.create_review(db=db, review=review, book_id=book_id)
+        raise HTTPException(status_code=400, detail="Book not found")
+    """
+
+    This route is used for adding a review to a book based on the book ID.
+    add_review() function takes book_id and review (of type schemas.Review) as parameters and a database session db as a dependency.
+    It checks if the book with the given ID exists. If it does, it creates a new review for the book using the crud.create_review() function.
+    If the book doesn't exist, it raises an HTTPException.
+
+
+
+    c) Retrieving Books by Author or Publication Year:
+
+    """
+
+    @app.get("/books")
+    def get_books_by_author_or_year(author: Optional[str] = None, publication_year: Optional[int] = None, db: Session = Depends(get_db)):
+
+        if author and publication_year:
+            return crud.get_books(db, author=author, publication_year=publication_year)
+
+        elif author:
+            return crud.get_books_by_author(db, author=author)
+        
+        elif publication_year:
+            return crud.get_books_by_year(db, publication_year=publication_year)
+
+        raise HTTPException(status_code=400, detail="Book not found")
+    """
+
+    This route is used for retrieving a list of books based on author or publication year.
+    get_books_by_author_or_year() function takes optional parameters author and publication_year, along with a database session db as a dependency.
+    It checks for different combinations of parameters:
+    If both author and publication_year are provided, it retrieves books based on both conditions using crud.get_books().
+    If only author is provided, it retrieves books based on the author using crud.get_books_by_author().
+    If only publication_year is provided, it retrieves books based on the publication year using crud.get_books_by_year().
+    If none of the conditions match, it raises an HTTPException.
+    
+    
+    
+    d) Retrieving Reviews for a Book:
+
+    """
+
+    @app.get("/books/{book_id}/reviews")
+    def get_reviews(book_id: int, db: Session = Depends(get_db)):
+        db_review = crud.get_reviews_by_id(db, book_id=book_id)
+
+        if db_review:
+            return db_review
+        
+        raise HTTPException(status_code=404, detail="No reviews found for this book")
+    """
+    
+    This route is used for retrieving all the reviews for a particular book.
+    get_reviews() function takes book_id as a parameter and a database session db as a dependency.
+    It retrieves reviews for the given book_id using the crud.get_reviews_by_id() function.
+    If no reviews are found, it raises an HTTPException.
+

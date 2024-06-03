@@ -1,5 +1,0 @@
-Open powershell Terminal
-
-1) Run the below command
-
-python "Employee Management System/main.py"
